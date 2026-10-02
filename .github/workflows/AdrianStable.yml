@@ -121,17 +121,18 @@ jobs:
           p = Path("smarttubetv/src/main/java/com/liskovsoft/smartyoutubetv2/tv/ui/browse/BrowseFragment.java")
           s = p.read_text(encoding="utf-8")
 
-          old = '''        Drawable bridgeIcon = Utils.getDrawable(getContext(), splashPresenter.getBridgePackageName(), "app_icon");
+          line1 = '        Drawable bridgeIcon = Utils.getDrawable(getContext(), splashPresenter.getBridgePackageName(), "app_icon");'
+          line2 = '        setBadgeDrawable(bridgeIcon != null ? bridgeIcon : appLogoRes > 0 ? ContextCompat.getDrawable(getContext(), appLogoRes) : null);'
+          repl2 = '        setBadgeDrawable(appLogoRes > 0 ? ContextCompat.getDrawable(getContext(), appLogoRes) : null);'
 
-          // Top right corner logo
-          setBadgeDrawable(bridgeIcon != null ? bridgeIcon : appLogoRes > 0 ? ContextCompat.getDrawable(getContext(), appLogoRes) : null);'''
+          if line1 not in s:
+              raise SystemExit("Nu am gasit linia bridgeIcon.")
+          if line2 not in s:
+              raise SystemExit("Nu am gasit linia setBadgeDrawable.")
 
-          new = '''        // Top right corner logo - folosim sigla proprie A.B.
-          setBadgeDrawable(appLogoRes > 0 ? ContextCompat.getDrawable(getContext(), appLogoRes) : null);'''
-
-          if old not in s:
-              raise SystemExit("Nu am gasit blocul siglei din dreapta sus.")
-          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+          s = s.replace(line1, '        // Bridge icon dezactivat: folosim mereu sigla A.B. proprie.', 1)
+          s = s.replace(line2, repl2, 1)
+          p.write_text(s, encoding="utf-8")
           PY
 
       - name: Configureaza semnatura fixa verificata
